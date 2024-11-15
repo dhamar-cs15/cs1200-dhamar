@@ -212,6 +212,31 @@ def sat_3_coloring(G):
     solver = Glucose3()
 
     # TODO: Add the clauses to the solver
+    # set up the indicator variables
+    sat_input = {}
+    input_id = 1
+
+    for v in range(G.N):
+        for color in range(3):
+            sat_input[(v, color)] = input_id
+            input_id += 1
+
+    # Each vertex must be assigned a color
+    for v in range(G.N):
+        for color in range(3):
+            solver.add_clause([sat_input[(v,color)]])
+    
+    # The endpoints of an edge cannot be assigned to the same color
+    for u in range(G.N):
+        for v in G.edges[u]:
+            for color in range(3):
+                solver.add_clause([-sat_input[(u, color)], -sat_input[(v, color)]])
+    
+    # Require all vertices to be assigned at most one color
+    for v in range(G.N):
+        for color_i in range(3):
+            for color_j in range(color_i + 1, 3):
+                solver.add_clause([-sat_input[(v, color_i)], -sat_input[(v, color_j)]])
 
     # Attempt to solve, return None if no solution possible
     if not solver.solve():
@@ -222,6 +247,11 @@ def sat_3_coloring(G):
     solution = solver.get_model()
 
     # TODO: If a solution is found, convert it into a coloring and update G.colors
+    for v in range(G.N):
+        for color in range(3):
+            if solution[sat_input[(v, color)] - 1] < 0:
+                G.colors[v] = color
+                break
 
     return G.colors
 
