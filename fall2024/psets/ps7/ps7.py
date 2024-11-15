@@ -223,8 +223,8 @@ def sat_3_coloring(G):
 
     # Each vertex must be assigned a color
     for v in range(G.N):
-        for color in range(3):
-            solver.add_clause([sat_input[(v,color)]])
+        solver.add_clause([sat_input[(v, color)] for color in range(3)])
+
     
     # The endpoints of an edge cannot be assigned to the same color
     for u in range(G.N):
@@ -249,7 +249,7 @@ def sat_3_coloring(G):
     # TODO: If a solution is found, convert it into a coloring and update G.colors
     for v in range(G.N):
         for color in range(3):
-            if solution[sat_input[(v, color)] - 1] < 0:
+            if solution[sat_input[(v, color)] - 1] > 0:
                 G.colors[v] = color
                 break
 
